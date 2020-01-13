@@ -74,7 +74,9 @@ object Hulk extends App {
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
   implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
 
-  val url = "http://localhost:8080/"
+//  val url = "http://localhost:8080/"
+  val url = args(0)
+  println(f"URL = $url")
 
   var uri = new java.net.URI(url)
   val host = uri.getHost
@@ -84,8 +86,6 @@ object Hulk extends App {
   @volatile
   var maxProcess = 1024
   @volatile
-  var nProcess = 0
-  @volatile
   var sent = 0
   @volatile
   var err = 0
@@ -93,35 +93,34 @@ object Hulk extends App {
   var responseCode: Int = 0
   var count = 0
 
-  println("In use               |\tResp OK |\tGot err |\tLatest response")
-  while (true) {
+  def threadFunc(): Unit ={
+    while (true) {
 
-    if (sent % 10 == 0)
-      print(f"\r$nProcess%6d of max $maxProcess%6d\t$sent%7d |\t$err%7d | \t$responseCode%6d")
-
-    if (nProcess < maxProcess) {
-      nProcess += 1
-      count += 1
-      val futureCount = count
-
-      val f = Future{
-        while (true) {
-
-          // Will expand the thread pool
-          // https://stackoverflow.com/questions/29068064/scala-concurrent-blocking-what-does-it-actually-do
-          blocking{
-            val response = caller()
-            responseCode = response.code
-            if (response.isSuccess)
-              sent += 1
-            if (response.isServerError)
-              err += 1
-            if (response.code == 429)
-              break
-          }
-        }
+      // Will expand the thread pool
+      // https://stackoverflow.com/questions/29068064/scala-concurrent-blocking-what-does-it-actually-do
+      blocking{
+        val response = caller()
+        responseCode = response.code
+        if (response.isSuccess)
+          sent += 1
+        if (response.isServerError)
+          err += 1
+        if (response.code == 429)
+          break
       }
     }
   }
 
+  println("In use               |\tResp OK |\tGot err |\tLatest response")
+
+  val futures = for (_ <- 0 until maxProcess)
+    yield Future(threadFunc())
+
+  while (true) {
+    if (sent % 10 == 0) {
+      val nFutures = futures.count(f => !f.isCompleted)
+      print(f"\r$nFutures%6d of max $maxProcess%6d|\t$sent%7d |\t$err%7d | \t$responseCode%6d")
+    }
+    Thread.sleep(100)
+  }
 }
