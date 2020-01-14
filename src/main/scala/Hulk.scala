@@ -51,7 +51,9 @@ object Hulk extends App {
               err += 1
             if (response.code == 429)
               break
-          case Failure(_: java.net.SocketTimeoutException) =>
+          case Failure(_: java.net.SocketTimeoutException
+                       |_: java.net.ConnectException
+                       |_: javax.net.ssl.SSLException) =>
           case Failure(e) => print(e)
         }
       }
