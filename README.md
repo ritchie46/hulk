@@ -18,7 +18,8 @@ leaving less of a fingerprint.
 ## Usage
 * Required: **java >= 1.8**
 
-Download the `jar` from the release page, and run the jar with the requires url:port.
+Download the `jar` from the [release page](https://github.com/ritchie46/hulk/releases/), and run the jar with the 
+required *url:port*.
 
 ```
 $ java -jar hulk-0.1.jar --url http://localhost:8080/
