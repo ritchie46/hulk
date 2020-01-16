@@ -1,8 +1,6 @@
 import java.util.concurrent.Executors
-
 import http._
 import scopt.OParser
-
 import scala.util.control.Breaks._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -37,8 +35,6 @@ object Hulk extends App {
   var err = 0
   @volatile
   var responseCode: Int = 0
-  var count = 0
-
   @volatile
   var responded: collection.mutable.Set[Int] = collection.mutable.Set()
 

@@ -1,13 +1,13 @@
 package utilities
+import scopt._
 
-import scopt.OParser
 case class Config(
                    url: String = "",
                    maxProcess: Int = 512
                  )
 
 object ArgParser {
- val builder = OParser.builder[Config]
+ val builder: OParserBuilder[Config] = OParser.builder[Config]
 
  val parser: OParser[Unit, Config] = {
   import builder._
