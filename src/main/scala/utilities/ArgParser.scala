@@ -3,7 +3,7 @@ import scopt._
 
 case class Config(
                    url: String = "",
-                   maxProcess: Int = 512
+                   maxProcess: Int = 5096
                  )
 
 object ArgParser {

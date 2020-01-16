@@ -14,6 +14,6 @@ class HttpCaller(val url: String, val headers: Headers) {
   def apply(): Try[HttpResponse[Array[Byte]]] = Try(handler
     .apply(uniqueUrl)
     // Standard values led to SocketTimeoutException
-    .timeout(connTimeoutMs = 20000, readTimeoutMs = 20000)
+    .timeout(connTimeoutMs = 5000, readTimeoutMs = 5000)
     .headers(headers.generate).asBytes)
 }
