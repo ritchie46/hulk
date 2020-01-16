@@ -1,5 +1,8 @@
 import java.util.concurrent.Executors
+
 import http._
+import scopt.OParser
+
 import scala.util.control.Breaks._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -8,7 +11,13 @@ import scala.concurrent._
 
 object Hulk extends App {
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-  val url = args(0)
+
+  val (url: String, maxProcess: Int) = OParser.parse(utilities.ArgParser.parser, args, utilities.Config()) match {
+    case Some(c) =>
+      Tuple2(c.url, c.maxProcess)
+    case _ =>
+      sys.exit(1)
+  }
 
   println(f"URL = $url")
 
@@ -17,7 +26,7 @@ object Hulk extends App {
   val headers = new Headers(host)
   val caller = new HttpCaller(url, headers)
 
-  val maxProcess = 512
+//  val maxProcess = 512
   val equalThreadPool = true
   val ec1 = if (equalThreadPool) {
     ExecutionContext.fromExecutorService{Executors.newFixedThreadPool(maxProcess)
