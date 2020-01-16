@@ -26,15 +26,10 @@ object Hulk extends App {
   val headers = new Headers(host)
   val caller = new HttpCaller(url, headers)
 
-//  val maxProcess = 512
-  val equalThreadPool = true
-  val ec1 = if (equalThreadPool) {
-    ExecutionContext.fromExecutorService{Executors.newFixedThreadPool(maxProcess)
-    }
-  } else {
-    // in combination with blocking function threads are dynamically created.
-    scala.concurrent.ExecutionContext.Implicits.global
-  }
+  // Used for http calling threads
+  val ec1 = ExecutionContext.fromExecutorService{Executors.newFixedThreadPool(maxProcess)}
+  // used to temporary show witch futures were able to get a response
+  val ec2 = scala.concurrent.ExecutionContext.Implicits.global
 
   @volatile
   var sent = 0
@@ -44,13 +39,30 @@ object Hulk extends App {
   var responseCode: Int = 0
   var count = 0
 
+  @volatile
+  var responded: collection.mutable.Set[Int] = collection.mutable.Set()
+
+  /**
+   * Add future id to `responded`. Has a lifetime of 100 ms.
+   * @param i Future count
+   */
+  def temporal(i: Int): Unit = {
+    responded.add(i)
+    blocking(
+      Thread.sleep(100)
+    )
+    responded.remove(i)
+  }
+
   def threadFunc(i: Int): Unit ={
     while (true) {
 
-      // Will expand the thread pool
+      // Will expand the thread pool if global EC is used
       // https://stackoverflow.com/questions/29068064/scala-concurrent-blocking-what-does-it-actually-do
       blocking{
         val r = caller()
+
+        Future(temporal(i))(ec1)
         r match {
           case Success(response) =>
             responseCode = response.code
@@ -69,15 +81,16 @@ object Hulk extends App {
     }
   }
 
-  println("In use              |\tResp OK |\tGot err |\tLatest response")
+  println("In use              |\t Effective |\tResp OK |\tGot err |\tLatest response")
 
   val futures = for (i <- 0 until maxProcess)
-    yield Future(threadFunc(i))(ec1)
+    yield Future(threadFunc(i))(ec2)
 
   while (true) {
     if (sent % 10 == 0) {
       val nFutures = futures.count(f => !f.isCompleted)
-      print(f"\r$nFutures%6d of max $maxProcess%6d|\t$sent%7d |\t$err%7d | \t$responseCode%6d")
+      val nResponse = responded.size
+      print(f"\r$nFutures%6d of max $maxProcess%6d|\t$nResponse%6d     |\t$sent%7d |\t$err%7d |\t$responseCode%6d")
     }
     Thread.sleep(100)
   }
