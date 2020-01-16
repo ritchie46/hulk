@@ -2,7 +2,7 @@ package utilities
 
 import scopt.OParser
 case class Config(
-                   url: String = "http://localhost/",
+                   url: String = "",
                    maxProcess: Int = 512
                  )
 
@@ -15,7 +15,8 @@ object ArgParser {
    programName("HULK"),
    head("HULK Unbearable Load King"),
    opt[String]('u', "url")
-       .action((x, c) => c.copy(url = x)),
+       .action((x, c) => c.copy(url = x))
+       .required(),
    opt[Int]('m', "max-process")
      .action((x, c) => c.copy(maxProcess = x)),
    help("help")
