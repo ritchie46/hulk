@@ -32,5 +32,7 @@ Usage: HULK [options]
 
   -u, --url <value>
   -m, --max-process <value>
+                           Upper parallel requests limit
+  -t, --timeout <value>    Connection timeout duration in ms
   --help
 ```

@@ -4,7 +4,9 @@ import utilities._
 
 import scala.util.{Random, Try}
 
-class HttpCaller(val url: String, val headers: Headers) {
+class HttpCaller(val url: String,
+                 val headers: Headers,
+                 val timeout: Int) {
   val paramJoiner: String = if (url.contains("?")) "&" else "?"
   val handler = new RequestHandler()
 
@@ -13,7 +15,6 @@ class HttpCaller(val url: String, val headers: Headers) {
 
   def apply(): Try[HttpResponse[Array[Byte]]] = Try(handler
     .apply(uniqueUrl)
-    // Standard values led to SocketTimeoutException
-    .timeout(connTimeoutMs = 5000, readTimeoutMs = 5000)
+    .timeout(connTimeoutMs = timeout, readTimeoutMs = timeout)
     .headers(headers.generate).asBytes)
 }

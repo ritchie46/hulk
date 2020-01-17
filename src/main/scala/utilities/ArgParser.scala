@@ -3,7 +3,8 @@ import scopt._
 
 case class Config(
                    url: String = "",
-                   maxProcess: Int = 5096
+                   maxProcess: Int = 2048,
+                   timeout: Int = 5000,
                  )
 
 object ArgParser {
@@ -18,7 +19,11 @@ object ArgParser {
        .action((x, c) => c.copy(url = x))
        .required(),
    opt[Int]('m', "max-process")
-     .action((x, c) => c.copy(maxProcess = x)),
+     .action((x, c) => c.copy(maxProcess = x))
+       .text("Upper parallel requests limit"),
+   opt[Int]('t', "timeout")
+      .action((x, c) => c.copy(timeout = x))
+       .text("Connection timeout duration in ms"),
    help("help")
   )
  }
