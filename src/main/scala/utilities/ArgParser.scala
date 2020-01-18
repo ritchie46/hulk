@@ -14,7 +14,7 @@ object ArgParser {
   import builder._
   OParser.sequence(
    programName("HULK"),
-   head("HULK Unbearable Load King"),
+   head("HULK: Http Unbearable Load King"),
    opt[String]('u', "url")
        .action((x, c) => c.copy(url = x))
        .required(),

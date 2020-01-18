@@ -27,7 +27,7 @@ $ java -jar hulk-0.1.jar --url http://localhost:8080/
 
 ## Options
 ```
-HULK Unbearable Load King
+HULK: Http Unbearable Load King
 Usage: HULK [options]
 
   -u, --url <value>
